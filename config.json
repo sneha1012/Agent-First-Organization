@@ -1,7 +1,16 @@
 {
-    "name": "AIHawk",
+    "name": "JobSearchPro",
     "version": "0.1.0",
-    "description": "AI-powered job application assistant using Arklex framework",
+    "description": "An intelligent job application assistant built using the Arklex framework. This assistant helps job seekers find, analyze, and apply for jobs more effectively by leveraging AI-powered analysis and automation.",
+    "domain": "job_search_and_application",
+    "role": "job_assistant",
+    "objectives": [
+        "Help users find relevant job opportunities",
+        "Analyze job requirements and company culture",
+        "Match resumes with job requirements",
+        "Prepare tailored application materials",
+        "Provide actionable insights for job applications"
+    ],
     "workers": {
         "job_search": {
             "type": "JobSearchWorker",
@@ -9,14 +18,25 @@
                 "search_engine": "indeed",
                 "max_results": 10,
                 "location": "remote",
-                "headless": true
+                "headless": true,
+                "timeout": 30,
+                "retry_attempts": 3,
+                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
         },
         "resume_parser": {
             "type": "ResumeParserWorker",
             "config": {
                 "model": "gpt-4",
-                "max_tokens": 2000
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "extract_fields": [
+                    "skills",
+                    "experience",
+                    "education",
+                    "certifications",
+                    "projects"
+                ]
             }
         }
     },
@@ -26,7 +46,15 @@
             "config": {
                 "model": "gpt-4",
                 "temperature": 0.7,
-                "max_tokens": 1000
+                "max_tokens": 1000,
+                "analysis_depth": "comprehensive",
+                "focus_areas": [
+                    "requirements",
+                    "company_culture",
+                    "growth_potential",
+                    "salary_range",
+                    "work_environment"
+                ]
             }
         },
         "resume_agent": {
@@ -34,7 +62,15 @@
             "config": {
                 "model": "gpt-4",
                 "temperature": 0.7,
-                "max_tokens": 1000
+                "max_tokens": 1000,
+                "analysis_depth": "detailed",
+                "focus_areas": [
+                    "skills_match",
+                    "experience_relevance",
+                    "education_alignment",
+                    "gaps_analysis",
+                    "improvement_suggestions"
+                ]
             }
         }
     },
@@ -42,32 +78,143 @@
         "search_jobs": {
             "worker": "job_search",
             "agent": "job_agent",
-            "description": "Search for jobs based on user criteria"
+            "description": "Search for jobs based on user criteria and preferences",
+            "input_schema": {
+                "query": "string",
+                "location": "string (optional)",
+                "filters": {
+                    "experience_level": "string (optional)",
+                    "job_type": "string (optional)",
+                    "salary_range": "string (optional)"
+                }
+            },
+            "output_schema": {
+                "jobs": [
+                    {
+                        "title": "string",
+                        "company": "string",
+                        "location": "string",
+                        "description": "string",
+                        "url": "string",
+                        "posted_date": "string"
+                    }
+                ]
+            }
         },
         "analyze_job": {
             "worker": "job_search",
             "agent": "job_agent",
-            "description": "Analyze a specific job posting"
+            "description": "Analyze a specific job posting for requirements and opportunities",
+            "input_schema": {
+                "job_url": "string"
+            },
+            "output_schema": {
+                "job_details": {
+                    "title": "string",
+                    "company": "string",
+                    "location": "string",
+                    "description": "string",
+                    "requirements": ["string"],
+                    "responsibilities": ["string"],
+                    "benefits": ["string"]
+                },
+                "analysis": {
+                    "required_skills": ["string"],
+                    "experience_level": "string",
+                    "salary_range": "string",
+                    "company_culture": "string",
+                    "growth_potential": "string"
+                }
+            }
         },
         "parse_resume": {
             "worker": "resume_parser",
             "agent": "resume_agent",
-            "description": "Parse and analyze resume"
+            "description": "Parse and analyze resume content",
+            "input_schema": {
+                "resume_text": "string"
+            },
+            "output_schema": {
+                "parsed_data": {
+                    "skills": ["string"],
+                    "experience": [
+                        {
+                            "title": "string",
+                            "company": "string",
+                            "duration": "string",
+                            "description": "string"
+                        }
+                    ],
+                    "education": [
+                        {
+                            "degree": "string",
+                            "institution": "string",
+                            "year": "string"
+                        }
+                    ],
+                    "certifications": ["string"]
+                },
+                "analysis": {
+                    "strengths": ["string"],
+                    "areas_for_improvement": ["string"],
+                    "key_achievements": ["string"]
+                }
+            }
         },
         "match_job": {
             "worker": "resume_parser",
             "agent": "job_agent",
-            "description": "Match resume with job requirements"
+            "description": "Match resume with job requirements and provide insights",
+            "input_schema": {
+                "resume_text": "string",
+                "job_url": "string"
+            },
+            "output_schema": {
+                "match_result": {
+                    "overall_match": "number",
+                    "skills_match": "number",
+                    "experience_match": "number",
+                    "education_match": "number"
+                },
+                "improvements": {
+                    "missing_skills": ["string"],
+                    "experience_gaps": ["string"],
+                    "education_gaps": ["string"],
+                    "suggestions": ["string"]
+                }
+            }
         },
         "prepare_application": {
             "worker": "job_search",
             "agent": "job_agent",
-            "description": "Prepare job application materials"
+            "description": "Prepare tailored job application materials",
+            "input_schema": {
+                "resume_text": "string",
+                "job_url": "string"
+            },
+            "output_schema": {
+                "cover_letter": "string",
+                "resume_highlights": ["string"],
+                "application_notes": "string"
+            }
         }
     },
     "api": {
         "host": "0.0.0.0",
         "port": 8000,
-        "debug": true
+        "debug": true,
+        "cors": {
+            "origins": ["*"],
+            "methods": ["GET", "POST"],
+            "headers": ["*"]
+        },
+        "rate_limit": {
+            "requests_per_minute": 60
+        }
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "file": "app.log"
     }
 } 
