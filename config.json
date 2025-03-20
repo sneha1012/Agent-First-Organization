@@ -1,0 +1,73 @@
+{
+    "name": "AIHawk",
+    "version": "0.1.0",
+    "description": "AI-powered job application assistant using Arklex framework",
+    "workers": {
+        "job_search": {
+            "type": "JobSearchWorker",
+            "config": {
+                "search_engine": "indeed",
+                "max_results": 10,
+                "location": "remote",
+                "headless": true
+            }
+        },
+        "resume_parser": {
+            "type": "ResumeParserWorker",
+            "config": {
+                "model": "gpt-4",
+                "max_tokens": 2000
+            }
+        }
+    },
+    "agents": {
+        "job_agent": {
+            "type": "JobAgent",
+            "config": {
+                "model": "gpt-4",
+                "temperature": 0.7,
+                "max_tokens": 1000
+            }
+        },
+        "resume_agent": {
+            "type": "ResumeAgent",
+            "config": {
+                "model": "gpt-4",
+                "temperature": 0.7,
+                "max_tokens": 1000
+            }
+        }
+    },
+    "tasks": {
+        "search_jobs": {
+            "worker": "job_search",
+            "agent": "job_agent",
+            "description": "Search for jobs based on user criteria"
+        },
+        "analyze_job": {
+            "worker": "job_search",
+            "agent": "job_agent",
+            "description": "Analyze a specific job posting"
+        },
+        "parse_resume": {
+            "worker": "resume_parser",
+            "agent": "resume_agent",
+            "description": "Parse and analyze resume"
+        },
+        "match_job": {
+            "worker": "resume_parser",
+            "agent": "job_agent",
+            "description": "Match resume with job requirements"
+        },
+        "prepare_application": {
+            "worker": "job_search",
+            "agent": "job_agent",
+            "description": "Prepare job application materials"
+        }
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port": 8000,
+        "debug": true
+    }
+} 
